@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
+import { Loader2, Search } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -28,6 +31,73 @@ const form = useForm({
     notes: '',
     gdpr_consent: false,
 });
+
+// Estado do VIES Check
+const countryCode = ref('PT');
+const isCheckingVies = ref(false);
+const viesMessage = ref('');
+const viesError = ref(false);
+
+const checkVies = async () => {
+    if (!form.vat_number) {
+        viesError.value = true;
+        viesMessage.value = 'Please enter a VAT number first.';
+        return;
+    }
+
+    // Auto-extrai o código do país se o utilizador escrever "PT501234567"
+    let parsedCountry = countryCode.value.toUpperCase();
+    let parsedVat = form.vat_number.replace(/\s+/g, ''); // Limpa espaços
+
+    const match = parsedVat.match(/^([A-Za-z]{2})(.+)$/);
+    if (match) {
+        parsedCountry = match[1].toUpperCase();
+        parsedVat = match[2];
+        countryCode.value = parsedCountry; // Atualiza a UI
+        form.vat_number = parsedVat; // Atualiza a UI
+    }
+
+    if (!parsedCountry) {
+        parsedCountry = 'PT';
+        countryCode.value = 'PT';
+    }
+
+    isCheckingVies.value = true;
+    viesMessage.value = '';
+    viesError.value = false;
+
+    try {
+        const response = await axios.post('/api/vies/check', {
+            country_code: parsedCountry,
+            vat_number: parsedVat,
+        });
+
+        if (response.data.success) {
+            const viesData = response.data.data;
+
+            form.name = viesData.name;
+            form.address = viesData.address;
+            form.zip_code = viesData.zip_code;
+            form.city = viesData.city;
+
+            viesError.value = false;
+            viesMessage.value = 'Entity found! Form auto-filled successfully.';
+        }
+    } catch (error: any) {
+        viesError.value = true;
+        if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+        ) {
+            viesMessage.value = error.response.data.message;
+        } else {
+            viesMessage.value = 'Failed to check VIES. Please try again.';
+        }
+    } finally {
+        isCheckingVies.value = false;
+    }
+};
 
 const submit = () => {
     form.post('/entities');
@@ -76,9 +146,8 @@ const submit = () => {
                                 <Label
                                     for="is_customer"
                                     class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
+                                    >Customer</Label
                                 >
-                                    Customer
-                                </Label>
                             </div>
                             <div class="flex items-center space-x-3">
                                 <Checkbox
@@ -93,9 +162,8 @@ const submit = () => {
                                 <Label
                                     for="is_supplier"
                                     class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
+                                    >Supplier</Label
                                 >
-                                    Supplier
-                                </Label>
                             </div>
                         </div>
 
@@ -106,13 +174,51 @@ const submit = () => {
                                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                                     >VAT Number (NIF) *</Label
                                 >
-                                <Input
-                                    id="vat_number"
-                                    v-model="form.vat_number"
-                                    type="text"
-                                    required
-                                    class="dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-400"
-                                />
+                                <div class="flex items-center gap-2">
+                                    <Input
+                                        v-model="countryCode"
+                                        type="text"
+                                        maxlength="2"
+                                        class="w-[60px] text-center uppercase dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                        placeholder="PT"
+                                        title="Country Code"
+                                    />
+                                    <Input
+                                        id="vat_number"
+                                        v-model="form.vat_number"
+                                        type="text"
+                                        required
+                                        class="flex-1 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-gray-400"
+                                        placeholder="501234567"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        @click="checkVies"
+                                        :disabled="isCheckingVies"
+                                        class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                                    >
+                                        <Loader2
+                                            v-if="isCheckingVies"
+                                            class="mr-2 h-4 w-4 animate-spin"
+                                        />
+                                        <Search v-else class="mr-2 h-4 w-4" />
+                                        <span class="hidden sm:inline"
+                                            >Check VIES</span
+                                        >
+                                    </Button>
+                                </div>
+                                <p
+                                    v-if="viesMessage"
+                                    :class="
+                                        viesError
+                                            ? 'text-red-500 dark:text-red-400'
+                                            : 'text-green-600 dark:text-green-400'
+                                    "
+                                    class="text-sm font-medium"
+                                >
+                                    {{ viesMessage }}
+                                </p>
                                 <p
                                     v-if="form.errors.vat_number"
                                     class="text-sm text-red-500 dark:text-red-400"
@@ -296,9 +402,8 @@ const submit = () => {
                             <Label
                                 for="gdpr_consent"
                                 class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >Entity has provided GDPR consent</Label
                             >
-                                Entity has provided GDPR consent
-                            </Label>
                         </div>
 
                         <div
@@ -309,13 +414,12 @@ const submit = () => {
                                     variant="outline"
                                     type="button"
                                     class="w-full sm:w-auto dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                                    >Cancel</Button
                                 >
-                                    Cancel
-                                </Button>
                             </Link>
                             <Button
                                 type="submit"
-                                :disabled="form.processing"
+                                :disabled="form.processing || isCheckingVies"
                                 class="w-full sm:w-auto dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
                             >
                                 Save Entity

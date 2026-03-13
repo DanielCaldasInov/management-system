@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/entities/{entity}/edit', [EntityController::class, 'edit'])->name('entities.edit');
     Route::put('/entities/{entity}', [EntityController::class, 'update'])->name('entities.update');
     Route::delete('/entities/{entity}', [EntityController::class, 'destroy'])->name('entities.destroy');
+
+    //Vies API
+    Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
 });
 
 require __DIR__.'/settings.php';
