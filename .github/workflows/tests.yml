@@ -42,16 +42,12 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          mkdir -p storage/framework/{sessions,views,cache}
           touch database/database.sqlite
           php artisan migrate --force
 
-      - name: Debug Wayfinder Command
-        run: php artisan wayfinder:generate --with-form
-
       - name: Build Assets
-        run: |
-          export APP_KEY=$(php artisan key:generate --show)
-          npm run build
+        run: npm run build
 
       - name: Run Tests
         run: ./vendor/bin/pest
