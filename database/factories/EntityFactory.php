@@ -12,33 +12,37 @@ class EntityFactory extends Factory
 {
     protected $model = Entity::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
+        $isCustomer = $this->faker->boolean(70);
+        $isSupplier = $this->faker->boolean(40);
+
+        if (! $isCustomer && ! $isSupplier) {
+            $isCustomer = true;
+        }
+
+        static $number = 1;
+
         return [
-            'is_customer' => $this->faker->boolean(70),
-            'is_supplier' => $this->faker->boolean(40),
-
-            'number' => $this->faker->unique()->randomNumber(5, true),
-
+            'number' => $number++,
+            'is_customer' => $isCustomer,
+            'is_supplier' => $isSupplier,
             'vat_number' => $this->faker->unique()->numerify('#########'),
-
             'name' => $this->faker->company(),
             'address' => $this->faker->streetAddress(),
-
-            'zip_code' => $this->faker->numerify('####-###'),
-
+            'zip_code' => $this->faker->postcode(),
             'city' => $this->faker->city(),
             'phone' => $this->faker->phoneNumber(),
             'mobile' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->companyEmail(),
             'website' => $this->faker->url(),
-            'notes' => $this->faker->sentence(),
-
-            'country_id' => null,
-
+            'notes' => $this->faker->optional()->paragraph(),
             'gdpr_consent' => $this->faker->boolean(80),
-            'is_active' => $this->faker->boolean(90),
         ];
     }
 }
-//TODO: Update when we have a countries table or an API

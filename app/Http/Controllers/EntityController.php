@@ -18,12 +18,12 @@ class EntityController extends Controller
 
             $query->where(function ($q) use ($search, $searchField) {
                 if ($searchField === 'name') {
-                    $q->where('name', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%$search%");
                 } elseif ($searchField === 'vat_number') {
-                    $q->where('vat_number', 'like', "%{$search}%");
+                    $q->where('vat_number', 'like', "%$search%");
                 } else {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('vat_number', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('vat_number', 'like', "%$search%");
                 }
             });
         }
@@ -86,7 +86,7 @@ class EntityController extends Controller
     public function show(Entity $entity)
     {
         return Inertia::render('Entities/Show', [
-            'entity' => $entity
+            'entity' => $entity,
         ]);
     }
 

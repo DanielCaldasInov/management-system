@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ExternalLink } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog.vue';
 import { Button } from '@/components/ui/button';
@@ -78,10 +79,10 @@ const toggleSort = (field: string) => {
     }
 };
 
-// Navigate to the show page when a row is clicked
 const goToEntity = (id: number) => {
     router.get(`/entities/${id}`);
 };
+
 </script>
 
 <template>
@@ -96,7 +97,7 @@ const goToEntity = (id: number) => {
                     <h2
                         class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200"
                     >
-                        Entities (Customers & Suppliers)
+                        Customers & Suppliers
                     </h2>
 
                     <Link href="/entities/create" class="w-full sm:w-auto">
@@ -181,12 +182,13 @@ const goToEntity = (id: number) => {
                                                     sortField === 'vat_number'
                                                 "
                                                 class="text-xs"
-                                                >{{
+                                            >
+                                                {{
                                                     sortDirection === 'asc'
                                                         ? '▲'
                                                         : '▼'
-                                                }}</span
-                                            >
+                                                }}
+                                            </span>
                                         </div>
                                     </TableHead>
 
@@ -199,23 +201,33 @@ const goToEntity = (id: number) => {
                                             <span
                                                 v-if="sortField === 'name'"
                                                 class="text-xs"
-                                                >{{
+                                            >
+                                                {{
                                                     sortDirection === 'asc'
                                                         ? '▲'
                                                         : '▼'
-                                                }}</span
-                                            >
+                                                }}
+                                            </span>
                                         </div>
                                     </TableHead>
 
                                     <TableHead
                                         class="whitespace-nowrap text-gray-500"
-                                        >Type</TableHead
+                                        >Phone</TableHead
+                                    >
+                                    <TableHead
+                                        class="whitespace-nowrap text-gray-500"
+                                        >Mobile</TableHead
+                                    >
+                                    <TableHead
+                                        class="whitespace-nowrap text-gray-500"
+                                        >Website</TableHead
                                     >
                                     <TableHead
                                         class="whitespace-nowrap text-gray-500"
                                         >Email</TableHead
                                     >
+
                                     <TableHead
                                         class="text-right whitespace-nowrap"
                                         >Actions</TableHead
@@ -235,34 +247,52 @@ const goToEntity = (id: number) => {
                                     >
                                         {{ entity.vat_number }}
                                     </TableCell>
+
                                     <TableCell
                                         class="whitespace-nowrap text-gray-700 dark:text-gray-300"
                                     >
                                         {{ entity.name }}
                                     </TableCell>
 
-                                    <TableCell class="whitespace-nowrap">
-                                        <span
-                                            v-if="
-                                                entity.is_customer &&
-                                                entity.is_supplier
-                                            "
-                                            class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/30 dark:text-purple-400 dark:ring-purple-900/50"
+                                    <TableCell
+                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
+                                    >
+                                        {{ entity.phone || '-' }}
+                                    </TableCell>
+
+                                    <TableCell
+                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
+                                    >
+                                        {{ entity.mobile || '-' }}
+                                    </TableCell>
+
+                                    <TableCell
+                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
+                                    >
+                                        <div
+                                            v-if="entity.website"
+                                            class="flex items-center gap-1"
+                                            @click.stop
                                         >
-                                            Customer & Supplier
-                                        </span>
-                                        <span
-                                            v-else-if="entity.is_customer"
-                                            class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset dark:bg-blue-900/30 dark:text-blue-400 dark:ring-blue-900/50"
-                                        >
-                                            Customer
-                                        </span>
-                                        <span
-                                            v-else-if="entity.is_supplier"
-                                            class="inline-flex items-center rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/30 dark:text-orange-400 dark:ring-orange-900/50"
-                                        >
-                                            Supplier
-                                        </span>
+                                            <a
+                                                :href="entity.website"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    class="h-8 w-8 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                                    title="Visit Website"
+                                                >
+                                                    <ExternalLink
+                                                        class="h-4 w-4"
+                                                    />
+                                                </Button>
+                                            </a>
+
+                                        </div>
+                                        <span v-else>-</span>
                                     </TableCell>
 
                                     <TableCell
@@ -304,7 +334,7 @@ const goToEntity = (id: number) => {
                                     "
                                 >
                                     <TableCell
-                                        colspan="5"
+                                        colspan="7"
                                         class="py-8 text-center text-gray-500 dark:text-gray-400"
                                     >
                                         <p>
