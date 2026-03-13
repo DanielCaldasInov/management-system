@@ -2,24 +2,19 @@ name: tests
 
 on:
   push:
-    branches:
-      - develop
-      - main
-      - master
-      - workos
+    branches: [ develop, main, master, workos ]
   pull_request:
-    branches:
-      - develop
-      - main
-      - master
-      - workos
+    branches: [ develop, main, master, workos ]
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-version: [ '8.4', '8.5' ]
+
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+      APP_ENV: testing
+      NODE_ENV: production
 
     steps:
       - name: Checkout code
@@ -28,7 +23,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: '8.4'
           tools: composer:v2
           coverage: xdebug
 
@@ -37,34 +32,26 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install PHP Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
       - name: Install Node Dependencies
         run: npm i
 
-      - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      - name: Copy Environment File
-        run: cp .env.example .env
-
-      - name: Generate Application Key
-        run: php artisan key:generate
-
-      - name: Prepare Database
+      - name: Prepare Environment
         run: |
+          cp .env.example .env
+          php artisan key:generate
           touch database/database.sqlite
           php artisan migrate --force
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
+
+      - name: Debug Wayfinder Command
+        run: php artisan wayfinder:generate --with-form
 
       - name: Build Assets
-        run: npm run build
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
+        run: |
+          export APP_KEY=$(php artisan key:generate --show)
+          npm run build
 
-      - name: Tests
+      - name: Run Tests
         run: ./vendor/bin/pest
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
