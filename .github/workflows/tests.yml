@@ -14,7 +14,6 @@ jobs:
       DB_CONNECTION: sqlite
       DB_DATABASE: database/database.sqlite
       APP_ENV: testing
-      NODE_ENV: production
 
     steps:
       - name: Checkout code
@@ -31,12 +30,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm install
 
       - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
-
-      - name: Install Node Dependencies
-        run: npm i
 
       - name: Prepare Environment
         run: |
