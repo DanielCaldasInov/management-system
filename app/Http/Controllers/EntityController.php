@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Entity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class EntityController extends Controller
@@ -60,6 +61,15 @@ class EntityController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'is_customer' => [
+                'required',
+                function ($attribute, $value, $fail) use ($request) {
+                    if (! $request->boolean('is_customer') && ! $request->boolean('is_supplier')) {
+                        $fail('The entity must be at least a Customer or a Supplier.');
+                    }
+                },
+            ],
+            'is_supplier' => 'required',
             'vat_number' => 'required|string|unique:entities,vat_number',
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
@@ -76,10 +86,12 @@ class EntityController extends Controller
         $validated['is_supplier'] = $request->boolean('is_supplier');
         $validated['gdpr_consent'] = $request->boolean('gdpr_consent');
 
-        $lastEntity = Entity::orderBy('number', 'desc')->first();
-        $validated['number'] = $lastEntity ? $lastEntity->number + 1 : 1;
+        DB::transaction(function () use ($validated) {
+            $lastEntity = Entity::lockForUpdate()->orderBy('number', 'desc')->first();
+            $validated['number'] = $lastEntity ? $lastEntity->number + 1 : 1;
 
-        Entity::create($validated);
+            Entity::create($validated);
+        });
 
         return redirect()->route('entities.index')->with('success', 'Entity created successfully.');
     }
@@ -101,6 +113,15 @@ class EntityController extends Controller
     public function update(Request $request, Entity $entity)
     {
         $validated = $request->validate([
+            'is_customer' => [
+                'required',
+                function ($attribute, $value, $fail) use ($request) {
+                    if (! $request->boolean('is_customer') && ! $request->boolean('is_supplier')) {
+                        $fail('The entity must be at least a Customer or a Supplier.');
+                    }
+                },
+            ],
+            'is_supplier' => 'required',
             'vat_number' => 'required|string|unique:entities,vat_number,'.$entity->id,
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',

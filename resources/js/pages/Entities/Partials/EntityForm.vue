@@ -120,35 +120,44 @@ const submit = () => {
 
 <template>
     <form @submit.prevent="submit" class="space-y-8">
-        <div
-            class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-5 sm:flex-row sm:gap-8 dark:border-gray-700 dark:bg-gray-800/60"
-        >
-            <div class="flex items-center space-x-3">
-                <input
-                    type="checkbox"
-                    id="is_customer"
-                    v-model="form.is_customer"
-                    class="h-5 w-5 cursor-pointer rounded border-gray-400 text-gray-900 focus:ring-gray-900 dark:border-gray-500 dark:bg-gray-800 dark:checked:bg-white dark:checked:text-gray-900"
-                />
-                <Label
-                    for="is_customer"
-                    class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
-                    >Customer</Label
-                >
+        <div class="space-y-2">
+            <div
+                class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-50 p-5 sm:flex-row sm:gap-8 dark:border-gray-700 dark:bg-gray-800/60"
+            >
+                <div class="flex items-center space-x-3">
+                    <input
+                        type="checkbox"
+                        id="is_customer"
+                        v-model="form.is_customer"
+                        class="h-5 w-5 cursor-pointer rounded border-gray-400 text-gray-900 focus:ring-gray-900 dark:border-gray-500 dark:bg-gray-800 dark:checked:bg-white dark:checked:text-gray-900"
+                    />
+                    <Label
+                        for="is_customer"
+                        class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
+                        >Customer</Label
+                    >
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input
+                        type="checkbox"
+                        id="is_supplier"
+                        v-model="form.is_supplier"
+                        class="h-5 w-5 cursor-pointer rounded border-gray-400 text-gray-900 focus:ring-gray-900 dark:border-gray-500 dark:bg-gray-800 dark:checked:bg-white dark:checked:text-gray-900"
+                    />
+                    <Label
+                        for="is_supplier"
+                        class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
+                        >Supplier</Label
+                    >
+                </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <input
-                    type="checkbox"
-                    id="is_supplier"
-                    v-model="form.is_supplier"
-                    class="h-5 w-5 cursor-pointer rounded border-gray-400 text-gray-900 focus:ring-gray-900 dark:border-gray-500 dark:bg-gray-800 dark:checked:bg-white dark:checked:text-gray-900"
-                />
-                <Label
-                    for="is_supplier"
-                    class="cursor-pointer text-base font-medium text-gray-800 dark:text-gray-200"
-                    >Supplier</Label
-                >
-            </div>
+
+            <p
+                v-if="form.errors.is_customer"
+                class="text-sm font-medium text-red-500 dark:text-red-400"
+            >
+                {{ form.errors.is_customer }}
+            </p>
         </div>
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
