@@ -60,8 +60,6 @@ class EntityController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'is_customer' => 'boolean',
-            'is_supplier' => 'boolean',
             'vat_number' => 'required|string|unique:entities,vat_number',
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
@@ -72,8 +70,11 @@ class EntityController extends Controller
             'email' => 'nullable|email',
             'website' => 'nullable|url',
             'notes' => 'nullable|string',
-            'gdpr_consent' => 'boolean',
         ]);
+
+        $validated['is_customer'] = $request->boolean('is_customer');
+        $validated['is_supplier'] = $request->boolean('is_supplier');
+        $validated['gdpr_consent'] = $request->boolean('gdpr_consent');
 
         $lastEntity = Entity::orderBy('number', 'desc')->first();
         $validated['number'] = $lastEntity ? $lastEntity->number + 1 : 1;
@@ -100,8 +101,6 @@ class EntityController extends Controller
     public function update(Request $request, Entity $entity)
     {
         $validated = $request->validate([
-            'is_customer' => 'boolean',
-            'is_supplier' => 'boolean',
             'vat_number' => 'required|string|unique:entities,vat_number,'.$entity->id,
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
@@ -112,8 +111,11 @@ class EntityController extends Controller
             'email' => 'nullable|email',
             'website' => 'nullable|url',
             'notes' => 'nullable|string',
-            'gdpr_consent' => 'boolean',
         ]);
+
+        $validated['is_customer'] = $request->boolean('is_customer');
+        $validated['is_supplier'] = $request->boolean('is_supplier');
+        $validated['gdpr_consent'] = $request->boolean('gdpr_consent');
 
         $entity->update($validated);
 
