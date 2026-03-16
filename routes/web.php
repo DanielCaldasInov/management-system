@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/entities/{entity}', [EntityController::class, 'update'])->name('entities.update');
     Route::delete('/entities/{entity}', [EntityController::class, 'destroy'])->name('entities.destroy');
 
-    //Vies API
+    // Articles
+    Route::resource('articles', ArticleController::class);
+
+    // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
 });
 

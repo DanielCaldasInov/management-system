@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Users, Moon, Sun } from 'lucide-vue-next';
+import { LayoutGrid, Users, Moon, Sun, Settings } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -42,6 +42,17 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Suppliers',
                 href: '/entities?type=supplier',
+            },
+        ],
+    },
+    {
+        title: 'Settings',
+        href: '#',
+        icon: Settings,
+        items: [
+            {
+                title: 'Articles',
+                href: '/articles',
             },
         ],
     },

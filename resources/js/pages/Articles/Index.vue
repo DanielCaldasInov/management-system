@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ExternalLink } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog.vue';
 import { Button } from '@/components/ui/button';
@@ -25,11 +24,10 @@ import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
-    entities: any;
+    articles: any;
     filters: {
         search?: string;
-        searchField?: string;
-        type?: string;
+        status?: string;
         sortField?: string;
         sortDirection?: string;
     };
@@ -37,27 +35,25 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Entities', href: '/entities' },
+    { title: 'Articles', href: '/articles' },
 ];
 
 const search = ref(props.filters?.search || '');
-const searchField = ref(props.filters?.searchField || 'all');
-const type = ref(props.filters?.type || 'all');
+const status = ref(props.filters?.status || 'all');
 const sortField = ref(props.filters?.sortField || 'created_at');
 const sortDirection = ref(props.filters?.sortDirection || 'desc');
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
-watch([search, searchField, type, sortField, sortDirection], () => {
+watch([search, status, sortField, sortDirection], () => {
     clearTimeout(searchTimeout);
 
     searchTimeout = setTimeout(() => {
         router.get(
-            '/entities',
+            '/articles',
             {
                 search: search.value,
-                searchField: searchField.value,
-                type: type.value,
+                status: status.value,
                 sortField: sortField.value,
                 sortDirection: sortDirection.value,
             },
@@ -79,13 +75,13 @@ const toggleSort = (field: string) => {
     }
 };
 
-const goToEntity = (id: number) => {
-    router.get(`/entities/${id}`);
+const goToArticle = (id: number) => {
+    router.get(`/articles/${id}`);
 };
 </script>
 
 <template>
-    <Head title="Entities" />
+    <Head title="Articles" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="py-6">
@@ -96,11 +92,13 @@ const goToEntity = (id: number) => {
                     <h2
                         class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200"
                     >
-                        Customers & Suppliers
+                        Articles Catalog
                     </h2>
 
-                    <Link href="/entities/create" class="w-full sm:w-auto">
-                        <Button class="w-full sm:w-auto">Add New Entity</Button>
+                    <Link href="/articles/create" class="w-full sm:w-auto">
+                        <Button class="w-full sm:w-auto"
+                            >Add New Article</Button
+                        >
                     </Link>
                 </div>
 
@@ -110,56 +108,35 @@ const goToEntity = (id: number) => {
                     <div
                         class="flex w-full flex-col gap-2 sm:max-w-md sm:flex-row"
                     >
-                        <Select v-model="searchField">
-                            <SelectTrigger
-                                class="w-full sm:w-35 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-                            >
-                                <SelectValue placeholder="Search by..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="all"
-                                        >All Fields</SelectItem
-                                    >
-                                    <SelectItem value="name">Name</SelectItem>
-                                    <SelectItem value="vat_number"
-                                        >NIF</SelectItem
-                                    >
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-
                         <Input
                             v-model="search"
                             type="text"
-                            placeholder="Type to search..."
+                            placeholder="Search by name or reference..."
                             class="w-full dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
                         />
                     </div>
 
                     <div class="flex w-full gap-2 sm:w-auto">
-                        <Button
-                            :variant="type === 'all' ? 'default' : 'outline'"
-                            @click="type = 'all'"
-                            class="flex-1 sm:flex-none"
-                            >All</Button
-                        >
-                        <Button
-                            :variant="
-                                type === 'customer' ? 'default' : 'outline'
-                            "
-                            @click="type = 'customer'"
-                            class="flex-1 sm:flex-none"
-                            >Customers</Button
-                        >
-                        <Button
-                            :variant="
-                                type === 'supplier' ? 'default' : 'outline'
-                            "
-                            @click="type = 'supplier'"
-                            class="flex-1 sm:flex-none"
-                            >Suppliers</Button
-                        >
+                        <Select v-model="status">
+                            <SelectTrigger
+                                class="w-full sm:w-40 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+                            >
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="all"
+                                        >All Status</SelectItem
+                                    >
+                                    <SelectItem value="active"
+                                        >Active</SelectItem
+                                    >
+                                    <SelectItem value="inactive"
+                                        >Inactive</SelectItem
+                                    >
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -171,15 +148,18 @@ const goToEntity = (id: number) => {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead
+                                        class="w-16 whitespace-nowrap text-gray-500"
+                                        >Photo</TableHead
+                                    >
+
+                                    <TableHead
                                         class="cursor-pointer whitespace-nowrap select-none hover:bg-gray-50 dark:hover:bg-gray-800"
-                                        @click="toggleSort('vat_number')"
+                                        @click="toggleSort('reference')"
                                     >
                                         <div class="flex items-center gap-1">
-                                            NIF
+                                            Reference
                                             <span
-                                                v-if="
-                                                    sortField === 'vat_number'
-                                                "
+                                                v-if="sortField === 'reference'"
                                                 class="text-xs"
                                                 >{{
                                                     sortDirection === 'asc'
@@ -210,22 +190,31 @@ const goToEntity = (id: number) => {
 
                                     <TableHead
                                         class="whitespace-nowrap text-gray-500"
-                                        >Phone</TableHead
+                                        >Description</TableHead
                                     >
+
                                     <TableHead
-                                        class="whitespace-nowrap text-gray-500"
-                                        >Mobile</TableHead
+                                        class="cursor-pointer text-right whitespace-nowrap select-none hover:bg-gray-50 dark:hover:bg-gray-800"
+                                        @click="toggleSort('price')"
                                     >
+                                        <div
+                                            class="flex items-center justify-end gap-1"
+                                        >
+                                            Price
+                                            <span
+                                                v-if="sortField === 'price'"
+                                                class="text-xs"
+                                                >{{
+                                                    sortDirection === 'asc'
+                                                        ? '▲'
+                                                        : '▼'
+                                                }}</span
+                                            >
+                                        </div>
+                                    </TableHead>
+
                                     <TableHead
-                                        class="whitespace-nowrap text-gray-500"
-                                        >Website</TableHead
-                                    >
-                                    <TableHead
-                                        class="whitespace-nowrap text-gray-500"
-                                        >Email</TableHead
-                                    >
-                                    <TableHead
-                                        class="text-right whitespace-nowrap"
+                                        class="text-right whitespace-nowrap text-gray-500"
                                         >Actions</TableHead
                                     >
                                 </TableRow>
@@ -233,67 +222,59 @@ const goToEntity = (id: number) => {
 
                             <TableBody>
                                 <TableRow
-                                    v-for="entity in entities?.data"
-                                    :key="entity.id"
+                                    v-for="article in articles?.data"
+                                    :key="article.id"
                                     class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                                    @click="goToEntity(entity.id)"
+                                    @click="goToArticle(article.id)"
                                 >
+                                    <TableCell>
+                                        <div
+                                            class="h-10 w-10 overflow-hidden rounded-md border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                                        >
+                                            <img
+                                                v-if="article.photo_path"
+                                                :src="`/storage/${article.photo_path}`"
+                                                class="h-full w-full object-cover"
+                                                alt="Photo"
+                                            />
+                                            <div
+                                                v-else
+                                                class="flex h-full w-full items-center justify-center text-xs text-gray-400"
+                                            >
+                                                N/A
+                                            </div>
+                                        </div>
+                                    </TableCell>
+
                                     <TableCell
                                         class="font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ entity.vat_number }}
+                                        {{ article.reference }}
                                     </TableCell>
 
                                     <TableCell
                                         class="whitespace-nowrap text-gray-700 dark:text-gray-300"
                                     >
-                                        {{ entity.name }}
-                                    </TableCell>
-
-                                    <TableCell
-                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ entity.phone || '-' }}
-                                    </TableCell>
-
-                                    <TableCell
-                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ entity.mobile || '-' }}
-                                    </TableCell>
-
-                                    <TableCell
-                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
-                                    >
-                                        <div
-                                            v-if="entity.website"
-                                            class="flex items-center gap-1"
-                                            @click.stop
-                                        >
-                                            <a
-                                                :href="entity.website"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    class="h-8 w-8 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                                    title="Visit Website"
-                                                >
-                                                    <ExternalLink
-                                                        class="h-4 w-4"
-                                                    />
-                                                </Button>
-                                            </a>
+                                        <div class="flex items-center gap-2">
+                                            {{ article.name }}
+                                            <span
+                                                v-if="!article.is_active"
+                                                class="inline-flex h-2 w-2 rounded-full bg-red-500"
+                                                title="Inactive"
+                                            ></span>
                                         </div>
-                                        <span v-else>-</span>
                                     </TableCell>
 
                                     <TableCell
-                                        class="whitespace-nowrap text-gray-700 dark:text-gray-300"
+                                        class="max-w-50 truncate text-gray-500 dark:text-gray-400"
                                     >
-                                        {{ entity.email || '-' }}
+                                        {{ article.description || '-' }}
+                                    </TableCell>
+
+                                    <TableCell
+                                        class="text-right font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
+                                    >
+                                        € {{ Number(article.price).toFixed(2) }}
                                     </TableCell>
 
                                     <TableCell
@@ -302,7 +283,7 @@ const goToEntity = (id: number) => {
                                     >
                                         <div class="flex justify-end gap-2">
                                             <Link
-                                                :href="`/entities/${entity.id}/edit`"
+                                                :href="`/articles/${article.id}/edit`"
                                             >
                                                 <Button
                                                     variant="outline"
@@ -311,11 +292,11 @@ const goToEntity = (id: number) => {
                                                 >
                                             </Link>
                                             <ConfirmDeleteDialog
-                                                :url="`/entities/${entity.id}`"
+                                                :url="`/articles/${article.id}`"
                                                 trigger-variant="destructive"
                                                 trigger-size="sm"
                                                 trigger-text="Delete"
-                                                :description="`This will permanently delete ${entity.name} from the database.`"
+                                                :description="`This will permanently delete ${article.name} from the catalog.`"
                                             />
                                         </div>
                                     </TableCell>
@@ -323,24 +304,20 @@ const goToEntity = (id: number) => {
 
                                 <TableRow
                                     v-if="
-                                        !entities?.data ||
-                                        entities.data.length === 0
+                                        !articles?.data ||
+                                        articles.data.length === 0
                                     "
                                 >
                                     <TableCell
-                                        colspan="7"
+                                        colspan="6"
                                         class="py-8 text-center text-gray-500 dark:text-gray-400"
                                     >
-                                        <p>
-                                            No entities found matching your
-                                            filters.
-                                        </p>
+                                        <p>No articles found.</p>
                                         <Button
                                             variant="link"
                                             @click="
                                                 search = '';
-                                                type = 'all';
-                                                searchField = 'all';
+                                                status = 'all';
                                             "
                                             class="mt-2 text-blue-600 dark:text-blue-400"
                                         >
@@ -353,24 +330,24 @@ const goToEntity = (id: number) => {
                     </div>
 
                     <div
-                        v-if="entities?.links && entities.links.length > 3"
+                        v-if="articles?.links && articles.links.length > 3"
                         class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 p-4 sm:flex-row dark:border-gray-800 dark:bg-gray-800/50"
                     >
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             Showing
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ entities.from }}</span
+                                >{{ articles.from }}</span
                             >
                             to
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ entities.to }}</span
+                                >{{ articles.to }}</span
                             >
                             of
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ entities.total }}</span
+                                >{{ articles.total }}</span
                             >
                             entries
                         </div>
@@ -378,7 +355,7 @@ const goToEntity = (id: number) => {
                             class="flex flex-wrap items-center justify-center gap-1"
                         >
                             <template
-                                v-for="(link, index) in entities.links"
+                                v-for="(link, index) in articles.links"
                                 :key="index"
                             >
                                 <div
