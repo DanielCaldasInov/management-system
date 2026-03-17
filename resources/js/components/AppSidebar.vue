@@ -43,6 +43,10 @@ const mainNavItems: NavItem[] = [
                 title: 'Suppliers',
                 href: '/entities?type=supplier',
             },
+            {
+                title: 'Quotes',
+                href: '/quotes',
+            },
         ],
     },
     {

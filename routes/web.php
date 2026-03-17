@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -29,6 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Settings - Company
     Route::get('/settings/company', [CompanyController::class, 'edit'])->name('company.edit');
     Route::post('/settings/company', [CompanyController::class, 'update'])->name('company.update');
+
+    // Quotes
+    Route::resource('quotes', QuoteController::class);
+    Route::patch('/quotes/{quote}/status', [QuoteController::class, 'updateStatus'])->name('quotes.updateStatus');
+    Route::get('/quotes/{quote}/pdf', [QuoteController::class, 'downloadPdf'])->name('quotes.pdf');
 
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');

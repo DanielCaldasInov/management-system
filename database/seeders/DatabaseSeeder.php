@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Company;
 use App\Models\Entity;
+use App\Models\Quote;
+use App\Models\QuoteLine;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -34,5 +36,17 @@ class DatabaseSeeder extends Seeder
         Entity::factory(30)->create();
 
         Article::factory(35)->create();
+
+        Quote::factory(20)->create()->each(function ($quote) {
+            $lines = QuoteLine::factory(rand(1, 5))->create([
+                'quote_id' => $quote->id,
+            ]);
+
+            $quote->update([
+                'subtotal' => $lines->sum('subtotal'),
+                'vat_total' => $lines->sum('vat_amount'),
+                'total' => $lines->sum('total'),
+            ]);
+        });
     }
 }
