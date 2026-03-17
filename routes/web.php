@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Articles
     Route::resource('articles', ArticleController::class);
+
+    // Settings - Company
+    Route::get('/settings/company', [CompanyController::class, 'edit'])->name('company.edit');
+    Route::post('/settings/company', [CompanyController::class, 'update'])->name('company.update');
 
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');

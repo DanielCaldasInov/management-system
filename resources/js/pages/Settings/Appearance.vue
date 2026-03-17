@@ -9,7 +9,7 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Appearance settings',
+        title: 'Appearance Settings',
         href: edit(),
     },
 ];

@@ -51,6 +51,10 @@ const mainNavItems: NavItem[] = [
         icon: Settings,
         items: [
             {
+                title: 'Company',
+                href: '/settings/company',
+            },
+            {
                 title: 'Articles',
                 href: '/articles',
             },
