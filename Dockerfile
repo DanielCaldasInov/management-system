@@ -20,12 +20,15 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
+RUN cp .env.example .env \
+    && touch database/database.sqlite \
+    && php artisan key:generate
+
 RUN npm ci
 RUN npm run build
 
 RUN rm -rf node_modules
 
-RUN touch database/database.sqlite
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache database
 
