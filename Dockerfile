@@ -18,7 +18,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install
 
 RUN cp .env.example .env \
     && touch database/database.sqlite \
@@ -30,6 +30,8 @@ RUN npm ci
 RUN npm run build
 
 RUN rm -rf node_modules
+
+RUN composer install --no-dev --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache database
