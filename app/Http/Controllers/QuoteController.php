@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Company;
 use App\Models\Entity;
+use App\Models\Order;
 use App\Models\Quote;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -15,12 +16,26 @@ class QuoteController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $status = $request->input('status');
+
         $quotes = Quote::with('entity')
+            ->when($search, function ($query, $search) {
+                $query->where('reference', 'like', "%{$search}%")
+                    ->orWhereHas('entity', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
+            })
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Quotes/Index', [
             'quotes' => $quotes,
+            'filters' => $request->only(['search', 'status']),
         ]);
     }
 
@@ -131,5 +146,48 @@ class QuoteController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download('Quote_'.$quote->reference.'.pdf');
+    }
+
+    public function convertToOrder(Quote $quote)
+    {
+        $quote->load('lines');
+
+        DB::transaction(function () use ($quote) {
+
+            $year = date('Y');
+            $lastOrder = Order::whereYear('created_at', $year)->latest('id')->first();
+            $nextNumber = $lastOrder ? intval(substr($lastOrder->reference, -4)) + 1 : 1;
+            $reference = 'ENC-'.$year.'-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+            $order = Order::create([
+                'type' => 'customer',
+                'entity_id' => $quote->entity_id,
+                'quote_id' => $quote->id,
+                'reference' => $reference,
+                'issue_date' => now()->format('Y-m-d'),
+                'status' => 'draft',
+                'subtotal' => $quote->subtotal,
+                'vat_total' => $quote->vat_total,
+                'total' => $quote->total,
+                'notes' => $quote->notes,
+            ]);
+
+            foreach ($quote->lines as $line) {
+                $order->lines()->create([
+                    'article_id' => $line->article_id,
+                    'supplier_id' => null,
+                    'description' => $line->description,
+                    'quantity' => $line->quantity,
+                    'unit_price' => $line->unit_price,
+                    'cost_price' => $line->article ? $line->article->cost_price : null,
+                    'vat_percentage' => $line->vat_percentage,
+                    'subtotal' => $line->subtotal,
+                    'vat_amount' => $line->vat_amount,
+                    'total' => $line->total,
+                ]);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Quote successfully converted to a Draft Order!');
     }
 }

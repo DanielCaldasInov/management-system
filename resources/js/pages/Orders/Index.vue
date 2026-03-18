@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
     Table,
@@ -15,32 +14,28 @@ import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 const props = defineProps<{
-    quotes: any;
+    orders: any;
     filters: any;
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Quotes', href: '/quotes' },
+    { title: 'Customer Orders', href: '/orders' },
 ];
 
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'draft':
             return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-        case 'sent':
-            return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-        case 'accepted':
+        case 'closed':
             return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-        case 'rejected':
-            return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
         default:
             return 'bg-gray-100 text-gray-800';
     }
 };
 
-const goToQuote = (id: number) => {
-    router.get(`/quotes/${id}`);
+const goToOrder = (id: number) => {
+    router.get(`/orders/${id}`);
 };
 
 const search = ref(props.filters?.search || '');
@@ -51,7 +46,7 @@ watch([search, status], ([newSearch, newStatus]) => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         router.get(
-            '/quotes',
+            '/orders',
             { search: newSearch, status: newStatus },
             {
                 preserveState: true,
@@ -63,7 +58,7 @@ watch([search, status], ([newSearch, newStatus]) => {
 </script>
 
 <template>
-    <Head title="Quotes" />
+    <Head title="Customer Orders" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="py-6">
@@ -74,7 +69,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                     <h2
                         class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200"
                     >
-                        Quotes Management
+                        Customer Orders
                     </h2>
 
                     <div
@@ -92,16 +87,8 @@ watch([search, status], ([newSearch, newStatus]) => {
                         >
                             <option value="">All Statuses</option>
                             <option value="draft">Draft</option>
-                            <option value="sent">Sent</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="closed">Closed</option>
                         </select>
-
-                        <Link href="/quotes/create" class="w-full sm:w-auto">
-                            <Button class="w-full sm:w-auto"
-                                >Create Quote</Button
-                            >
-                        </Link>
                     </div>
                 </div>
 
@@ -125,6 +112,9 @@ watch([search, status], ([newSearch, newStatus]) => {
                                         class="text-right whitespace-nowrap"
                                         >Total</TableHead
                                     >
+                                    <TableHead class="whitespace-nowrap"
+                                        >Origin</TableHead
+                                    >
                                     <TableHead
                                         class="text-center whitespace-nowrap"
                                         >Status</TableHead
@@ -134,24 +124,21 @@ watch([search, status], ([newSearch, newStatus]) => {
 
                             <TableBody>
                                 <TableRow
-                                    v-for="quote in quotes?.data"
-                                    :key="quote.id"
+                                    v-for="order in orders?.data"
+                                    :key="order.id"
                                     class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                                    @click="goToQuote(quote.id)"
+                                    @click="goToOrder(order.id)"
                                 >
                                     <TableCell
                                         class="font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                                     >
-                                        {{ quote.reference }}
+                                        {{ order.reference }}
                                     </TableCell>
 
                                     <TableCell
                                         class="whitespace-nowrap text-gray-700 dark:text-gray-300"
                                     >
-                                        {{
-                                            quote.entity?.name ||
-                                            'Unknown Customer'
-                                        }}
+                                        {{ order.entity?.name || 'Unknown' }}
                                     </TableCell>
 
                                     <TableCell
@@ -159,7 +146,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                                     >
                                         {{
                                             new Date(
-                                                quote.issue_date,
+                                                order.issue_date,
                                             ).toLocaleDateString()
                                         }}
                                     </TableCell>
@@ -167,7 +154,21 @@ watch([search, status], ([newSearch, newStatus]) => {
                                     <TableCell
                                         class="text-right font-medium whitespace-nowrap text-gray-900 dark:text-gray-100"
                                     >
-                                        € {{ Number(quote.total).toFixed(2) }}
+                                        € {{ Number(order.total).toFixed(2) }}
+                                    </TableCell>
+
+                                    <TableCell class="whitespace-nowrap">
+                                        <span
+                                            v-if="order.quote"
+                                            class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-900/50"
+                                        >
+                                            {{ order.quote.reference }}
+                                        </span>
+                                        <span
+                                            v-else
+                                            class="text-gray-400 dark:text-gray-600"
+                                            >-</span
+                                        >
                                     </TableCell>
 
                                     <TableCell
@@ -175,27 +176,26 @@ watch([search, status], ([newSearch, newStatus]) => {
                                     >
                                         <span
                                             :class="
-                                                getStatusColor(quote.status)
+                                                getStatusColor(order.status)
                                             "
                                             class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wider uppercase"
                                         >
-                                            {{ quote.status }}
+                                            {{ order.status }}
                                         </span>
                                     </TableCell>
                                 </TableRow>
 
                                 <TableRow
                                     v-if="
-                                        !quotes?.data ||
-                                        quotes.data.length === 0
+                                        !orders?.data ||
+                                        orders.data.length === 0
                                     "
                                 >
                                     <TableCell
                                         colspan="5"
                                         class="py-8 text-center text-gray-500 dark:text-gray-400"
                                     >
-                                        No quotes found. Create your first
-                                        quote!
+                                        No orders found.
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
@@ -203,24 +203,24 @@ watch([search, status], ([newSearch, newStatus]) => {
                     </div>
 
                     <div
-                        v-if="quotes?.links && quotes.links.length > 3"
+                        v-if="orders?.links && orders.links.length > 3"
                         class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 p-4 sm:flex-row dark:border-gray-800 dark:bg-gray-800/50"
                     >
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             Showing
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ quotes.from }}</span
+                                >{{ orders.from }}</span
                             >
                             to
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ quotes.to }}</span
+                                >{{ orders.to }}</span
                             >
                             of
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ quotes.total }}</span
+                                >{{ orders.total }}</span
                             >
                             entries
                         </div>
@@ -228,7 +228,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                             class="flex flex-wrap items-center justify-center gap-1"
                         >
                             <template
-                                v-for="(link, index) in quotes.links"
+                                v-for="(link, index) in orders.links"
                                 :key="index"
                             >
                                 <div

@@ -47,6 +47,10 @@ const mainNavItems: NavItem[] = [
                 title: 'Quotes',
                 href: '/quotes',
             },
+            {
+                title: 'Customer Orders',
+                href: '/orders',
+            },
         ],
     },
     {
