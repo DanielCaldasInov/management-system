@@ -1,21 +1,11 @@
-FROM node:20-alpine AS frontend-build
-WORKDIR /app
-
-COPY package.json package-lock.json* vite.config.ts ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
 FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    unzip \
-    sqlite3 \
-    libsqlite3-dev \
+    libzip-dev unzip sqlite3 libsqlite3-dev curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install pdo_sqlite zip bcmath
 
 RUN a2enmod rewrite
@@ -28,12 +18,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-COPY --from=frontend-build /app/public/build public/build
-
 RUN composer install --no-dev --optimize-autoloader
 
-RUN touch database/database.sqlite
+RUN npm ci
+RUN npm run build
 
+RUN rm -rf node_modules
+
+RUN touch database/database.sqlite
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache database
 
