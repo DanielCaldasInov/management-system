@@ -22,6 +22,8 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN cp .env.example .env \
     && touch database/database.sqlite \
+    && echo "\nDB_CONNECTION=sqlite" >> .env \
+    && echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env \
     && php artisan key:generate
 
 RUN npm ci
