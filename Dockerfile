@@ -24,7 +24,8 @@ RUN cp .env.example .env \
     && touch database/database.sqlite \
     && echo "\nDB_CONNECTION=sqlite" >> .env \
     && echo "DB_DATABASE=/var/www/html/database/database.sqlite" >> .env \
-    && php artisan key:generate
+    && php artisan key:generate \
+    && php artisan migrate --force
 
 RUN npm ci
 RUN npm run build
