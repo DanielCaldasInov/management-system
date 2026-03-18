@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Users, Moon, Sun, Settings } from 'lucide-vue-next';
+import {
+    LayoutGrid,
+    Users,
+    Moon,
+    Sun,
+    Settings,
+    ShoppingCart,
+    PackageOpen,
+} from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -32,7 +40,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Entities',
-        href: '/entities',
+        href: '#', // Alterado para '#' se for apenas um agregador
         icon: Users,
         items: [
             {
@@ -43,6 +51,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Suppliers',
                 href: '/entities?type=supplier',
             },
+        ],
+    },
+    {
+        title: 'Sales',
+        href: '#',
+        icon: ShoppingCart,
+        items: [
             {
                 title: 'Quotes',
                 href: '/quotes',
@@ -51,6 +66,18 @@ const mainNavItems: NavItem[] = [
                 title: 'Customer Orders',
                 href: '/orders',
             },
+        ],
+    },
+    {
+        title: 'Purchases',
+        href: '#',
+        icon: PackageOpen,
+        items: [
+            {
+                title: 'Supplier Orders',
+                href: '/supplier-orders',
+            },
+            // Em breve colocaremos aqui as "Supplier Invoices"
         ],
     },
     {

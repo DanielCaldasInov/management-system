@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\SupplierOrderController;
 use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -42,7 +43,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('orders', OrderController::class);
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::put('/orders/{order}/lines', [OrderController::class, 'updateLines'])->name('orders.updateLines');
+    Route::post('/orders/{order}/generate-suppliers', [OrderController::class, 'generateSupplierOrders'])->name('orders.generateSuppliers');
 
+    // Supplier Orders
+    Route::get('/supplier-orders', [SupplierOrderController::class, 'index'])->name('supplier-orders.index');
+    Route::get('/supplier-orders/{supplierOrder}', [SupplierOrderController::class, 'show'])->name('supplier-orders.show');
+    Route::get('/supplier-orders/{supplierOrder}/pdf', [SupplierOrderController::class, 'downloadPdf'])->name('supplier-orders.pdf');
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
 });

@@ -40,7 +40,7 @@
         </p>
     </div>
     <div class="quote-info">
-        <h1 style="color: #4a5568; margin-bottom: 5px;">QUOTE</h1>
+        <h1 style="color: #4a5568; margin-bottom: 5px;">{{ $document_title ?? 'QUOTE' }}</h1>
         <h2 style="margin-top: 0;">{{ $quote->reference }}</h2>
 
         @php
@@ -67,7 +67,9 @@
     </div>
     <div class="meta-info">
         <strong>Issue Date:</strong> {{ $quote->issue_date->format('d/m/Y') }}<br><br>
-        <strong>Valid Until:</strong> {{ $quote->valid_until->format('d/m/Y') }}
+        @if($quote->valid_until)
+            <strong>Valid Until:</strong> {{ $quote->valid_until->format('d/m/Y') }}
+        @endif
     </div>
     <div class="clear"></div>
 </div>
