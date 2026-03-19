@@ -1,38 +1,37 @@
-FROM php:8.4-apache
+FROM php:8.4-cli
 
-WORKDIR /var/www/html
-
+# Instalar dependências de sistema e Node.js
 RUN apt-get update && apt-get install -y \
-    libzip-dev unzip sqlite3 libsqlite3-dev curl gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    libsqlite3-dev \
+    unzip \
+    git \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
-    && docker-php-ext-install pdo_sqlite zip bcmath
-
-RUN a2enmod rewrite
-
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+    && docker-php-ext-install pdo_sqlite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+WORKDIR /app
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install
 
-RUN cp .env.example .env && php artisan key:generate
+RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
+RUN cp .env.example .env
+RUN sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+RUN sed -i 's/^DB_DATABASE=.*/#DB_DATABASE=/' .env
+RUN php artisan key:generate
+
+RUN touch database/database.sqlite
+RUN php artisan migrate --force
 
 RUN npm ci
 RUN npm run build
+
 RUN rm -rf node_modules
+RUN composer install --no-dev --optimize-autoloader
 
-RUN touch database/database.sqlite
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache database
+RUN chmod -R 777 storage bootstrap/cache database
 
-EXPOSE 80
-
-CMD php artisan optimize:clear && \
-    php artisan optimize && \
-    php artisan migrate:fresh --seed --force && \
-    apache2-foreground
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
