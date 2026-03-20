@@ -11,7 +11,11 @@ class CompanyController extends Controller
 {
     public function edit()
     {
-        $company = Company::firstOrFail();
+        $company = Company::first();
+        if (! $company) {
+            $company = Company::factory()->create();
+
+        }
 
         return Inertia::render('Settings/Company', [
             'company' => $company,
