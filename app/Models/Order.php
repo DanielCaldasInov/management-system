@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, logsActivity, SoftDeletes;
 
     protected $fillable = [
         'type',
@@ -33,6 +35,12 @@ class Order extends Model
             'issue_date' => 'date',
             'notes' => 'encrypted',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable();
     }
 
     public function entity(): BelongsTo

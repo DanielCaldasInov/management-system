@@ -8,6 +8,7 @@ import {
     Settings,
     ShoppingCart,
     PackageOpen,
+    Camera
 } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -40,7 +41,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Entities',
-        href: '#', // Alterado para '#' se for apenas um agregador
+        href: '#',
         icon: Users,
         items: [
             {
@@ -97,6 +98,11 @@ const mainNavItems: NavItem[] = [
                 href: '/articles',
             },
         ],
+    },
+    {
+        title: 'Logs',
+        href: '/logs',
+        icon: Camera,
     },
 ];
 

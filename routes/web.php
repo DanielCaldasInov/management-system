@@ -4,6 +4,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\SupplierInvoiceController;
@@ -63,6 +64,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
+
+    // Logs
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
     // Supplier Invoices
     Route::post('/supplier-invoices/{supplierInvoice}/send-email', [SupplierInvoiceController::class, 'sendEmail'])->name('supplier-invoices.send-email');

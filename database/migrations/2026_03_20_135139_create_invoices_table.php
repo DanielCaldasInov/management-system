@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $table->string('attachment_path')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
