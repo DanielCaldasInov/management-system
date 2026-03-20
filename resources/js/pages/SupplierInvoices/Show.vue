@@ -142,9 +142,7 @@ const sendEmail = () => {
                                 class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
                             ></span>
                             {{
-                                sendingEmail
-                                    ? 'Sending...'
-                                    : 'Notify Supplier'
+                                sendingEmail ? 'Sending...' : 'Notify Supplier'
                             }}
                         </button>
                     </div>
@@ -324,7 +322,7 @@ const sendEmail = () => {
 
                             <div v-if="invoice.attachment_path" class="mb-4">
                                 <a
-                                    :href="`/storage/${invoice.attachment_path}`"
+                                    :href="`/supplier-invoices/${invoice.id}/download`"
                                     target="_blank"
                                     class="flex items-center gap-2 rounded-md bg-blue-50 p-3 text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
                                 >

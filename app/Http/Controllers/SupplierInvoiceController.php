@@ -52,25 +52,30 @@ class SupplierInvoiceController extends Controller
 
     public function uploadAttachment(Request $request, Invoice $supplierInvoice)
     {
-        if ($supplierInvoice->type !== 'supplier') {
-            abort(404);
-        }
-
         $request->validate([
-            'attachment' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // Máx 5MB
+            'attachment' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         if ($supplierInvoice->attachment_path) {
-            Storage::disk('public')->delete($supplierInvoice->attachment_path);
+            Storage::disk('local')->delete($supplierInvoice->attachment_path);
         }
 
-        $path = $request->file('attachment')->store('invoices/attachments', 'public');
+        $path = $request->file('attachment')->store('attachments', 'local');
 
         $supplierInvoice->update([
             'attachment_path' => $path,
         ]);
 
-        return back()->with('success', 'Attachment uploaded successfully.');
+        return back();
+    }
+
+    public function downloadAttachment(Invoice $supplierInvoice)
+    {
+        if (! $supplierInvoice->attachment_path || ! Storage::disk('local')->exists($supplierInvoice->attachment_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->response($supplierInvoice->attachment_path);
     }
 
     public function sendEmail(Invoice $supplierInvoice)

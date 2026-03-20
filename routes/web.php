@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuoteController;
@@ -16,7 +17,9 @@ Route::inertia('/', 'Welcome', [
 ])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Entity
     Route::get('/entities', [EntityController::class, 'index'])->name('entities.index');
@@ -55,6 +58,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/supplier-invoices', [SupplierInvoiceController::class, 'index'])->name('supplier-invoices.index');
     Route::get('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
     Route::post('/supplier-invoices/{supplierInvoice}/attachment', [SupplierInvoiceController::class, 'uploadAttachment'])->name('supplier-invoices.attachment');
+    Route::get('/supplier-invoices/{supplierInvoice}/download', [SupplierInvoiceController::class, 'downloadAttachment'])
+        ->name('supplier-invoices.download');
 
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');

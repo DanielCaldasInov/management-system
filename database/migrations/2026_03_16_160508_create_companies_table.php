@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('vat_number')->nullable();
-            $table->string('address')->nullable();
+            $table->text('address')->nullable();
             $table->string('zip_code')->nullable();
             $table->string('city')->nullable();
             $table->string('logo_path')->nullable();
