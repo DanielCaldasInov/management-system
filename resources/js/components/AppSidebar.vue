@@ -95,6 +95,21 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
+    {
+        title: 'Purchases',
+        href: '#',
+        icon: PackageOpen,
+        items: [
+            {
+                title: 'Supplier Orders',
+                href: '/supplier-orders',
+            },
+            {
+                title: 'Supplier Invoices',
+                href: '/supplier-invoices',
+            },
+        ],
+    },
 ];
 
 const footerNavItems: NavItem[] = [];

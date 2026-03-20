@@ -23,7 +23,7 @@ class OrderLineFactory extends Factory
         return [
             'order_id' => Order::factory(),
             'article_id' => Article::inRandomOrder()->first()->id ?? Article::factory(),
-            'supplier_id' => Entity::where('type', 'supplier')->inRandomOrder()->first()->id ?? null,
+            'supplier_id' => Entity::where('is_supplier', true)->inRandomOrder()->first()->id ?? null,
             'description' => $this->faker->words(3, true),
             'quantity' => $quantity,
             'unit_price' => $unitPrice,

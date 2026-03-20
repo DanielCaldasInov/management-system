@@ -13,7 +13,8 @@ class QuoteFactory extends Factory
         $validUntil = (clone $issueDate)->modify('+30 days');
 
         return [
-            'entity_id' => Entity::inRandomOrder()->first()->id ?? Entity::factory(),
+            'entity_id' => Entity::where('is_customer', true)->inRandomOrder()->first()->id
+                ?? Entity::factory()->create(['is_customer' => true, 'is_supplier' => false])->id,
             'reference' => 'PROP-'.$this->faker->unique()->numberBetween(10000, 99999),
             'issue_date' => $issueDate->format('Y-m-d'),
             'valid_until' => $validUntil->format('Y-m-d'),

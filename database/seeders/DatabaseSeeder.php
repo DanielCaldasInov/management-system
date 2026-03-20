@@ -5,6 +5,10 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Company;
 use App\Models\Entity;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\Order;
+use App\Models\OrderLine;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\User;
@@ -21,7 +25,6 @@ class DatabaseSeeder extends Seeder
     {
         Storage::disk('public')->deleteDirectory('articles');
         Storage::disk('public')->deleteDirectory('company');
-
         Storage::disk('public')->makeDirectory('articles');
         Storage::disk('public')->makeDirectory('company');
 
@@ -33,7 +36,8 @@ class DatabaseSeeder extends Seeder
 
         Company::factory()->create();
 
-        Entity::factory(30)->create();
+        Entity::factory(15)->create(['is_customer' => true, 'is_supplier' => false]);
+        Entity::factory(15)->create(['is_customer' => false, 'is_supplier' => true]);
 
         Article::factory(35)->create();
 
@@ -46,6 +50,51 @@ class DatabaseSeeder extends Seeder
                 'subtotal' => $lines->sum('subtotal'),
                 'vat_total' => $lines->sum('vat_amount'),
                 'total' => $lines->sum('total'),
+            ]);
+        });
+
+        Order::factory(15)->create(['type' => 'customer'])->each(function ($order) {
+            $lines = OrderLine::factory(rand(1, 5))->create([
+                'order_id' => $order->id,
+            ]);
+
+            $subtotal = $lines->sum(fn ($line) => $line->quantity * $line->unit_price);
+            $vatTotal = $lines->sum(fn ($line) => ($line->quantity * $line->unit_price) * ($line->vat_percentage / 100));
+
+            $order->update([
+                'subtotal' => $subtotal,
+                'vat_total' => $vatTotal,
+                'total' => $subtotal + $vatTotal,
+            ]);
+        });
+
+        Order::factory(10)->create(['type' => 'supplier'])->each(function ($order) {
+            $lines = OrderLine::factory(rand(1, 5))->create([
+                'order_id' => $order->id,
+            ]);
+
+            $subtotal = $lines->sum(fn ($line) => $line->quantity * $line->unit_price);
+            $vatTotal = $lines->sum(fn ($line) => ($line->quantity * $line->unit_price) * ($line->vat_percentage / 100));
+
+            $order->update([
+                'subtotal' => $subtotal,
+                'vat_total' => $vatTotal,
+                'total' => $subtotal + $vatTotal,
+            ]);
+        });
+
+        Invoice::factory(20)->create(['type' => 'supplier'])->each(function ($invoice) {
+            $lines = InvoiceLine::factory(rand(1, 5))->create([
+                'invoice_id' => $invoice->id,
+            ]);
+
+            $subtotal = $lines->sum(fn ($line) => $line->quantity * $line->unit_price);
+            $vatTotal = $lines->sum(fn ($line) => ($line->quantity * $line->unit_price) * ($line->vat_percentage / 100));
+
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'vat_total' => $vatTotal,
+                'total' => $subtotal + $vatTotal,
             ]);
         });
     }

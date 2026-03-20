@@ -5,6 +5,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\SupplierInvoiceController;
 use App\Http\Controllers\SupplierOrderController;
 use App\Http\Controllers\ViesController;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/supplier-orders', [SupplierOrderController::class, 'index'])->name('supplier-orders.index');
     Route::get('/supplier-orders/{supplierOrder}', [SupplierOrderController::class, 'show'])->name('supplier-orders.show');
     Route::get('/supplier-orders/{supplierOrder}/pdf', [SupplierOrderController::class, 'downloadPdf'])->name('supplier-orders.pdf');
+
+    // Supplier Invoices
+    Route::get('/supplier-invoices', [SupplierInvoiceController::class, 'index'])->name('supplier-invoices.index');
+    Route::get('/supplier-invoices/{supplierInvoice}', [SupplierInvoiceController::class, 'show'])->name('supplier-invoices.show');
+    Route::post('/supplier-invoices/{supplierInvoice}/attachment', [SupplierInvoiceController::class, 'uploadAttachment'])->name('supplier-invoices.attachment');
+
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
 });
