@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { Input } from '@/components/ui/input';
 import {
@@ -204,6 +204,58 @@ watch([search, status], ([newSearch, newStatus]) => {
                                 </TableRow>
                             </TableBody>
                         </Table>
+                    </div>
+
+                    <div
+                        v-if="invoices?.links && invoices.links.length > 3"
+                        class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 p-4 sm:flex-row dark:border-gray-800 dark:bg-gray-800/50"
+                    >
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            Showing
+                            <span
+                                class="font-medium text-gray-900 dark:text-white"
+                                >{{ invoices.from || 0 }}</span
+                            >
+                            to
+                            <span
+                                class="font-medium text-gray-900 dark:text-white"
+                                >{{ invoices.to || 0 }}</span
+                            >
+                            of
+                            <span
+                                class="font-medium text-gray-900 dark:text-white"
+                                >{{ invoices.total || 0 }}</span
+                            >
+                            entries
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-center gap-1"
+                        >
+                            <template
+                                v-for="(link, index) in invoices.links"
+                                :key="index"
+                            >
+                                <div
+                                    v-if="link.url === null"
+                                    class="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400 dark:text-gray-600"
+                                >
+                                    <span v-html="link.label"></span>
+                                </div>
+                                <Link
+                                    v-else
+                                    :href="link.url"
+                                    class="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
+                                    :class="
+                                        link.active
+                                            ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
+                                            : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                                    "
+                                    preserve-scroll
+                                >
+                                    <span v-html="link.label"></span>
+                                </Link>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>

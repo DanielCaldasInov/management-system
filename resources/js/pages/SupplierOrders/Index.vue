@@ -186,24 +186,24 @@ watch([search, status], ([newSearch, newStatus]) => {
                     </div>
 
                     <div
-                        v-if="orders?.links && orders.links.length > 3"
+                        v-if="orders?.links"
                         class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 bg-gray-50 p-4 sm:flex-row dark:border-gray-800 dark:bg-gray-800/50"
                     >
                         <div class="text-sm text-gray-500 dark:text-gray-400">
                             Showing
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ orders.from }}</span
+                                >{{ orders.from || 0 }}</span
                             >
                             to
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ orders.to }}</span
+                                >{{ orders.to || 0 }}</span
                             >
                             of
                             <span
                                 class="font-medium text-gray-900 dark:text-white"
-                                >{{ orders.total }}</span
+                                >{{ orders.total || 0 }}</span
                             >
                             entries
                         </div>
@@ -217,8 +217,9 @@ watch([search, status], ([newSearch, newStatus]) => {
                                 <div
                                     v-if="link.url === null"
                                     class="rounded-md border border-transparent px-3 py-1.5 text-sm text-gray-400 dark:text-gray-600"
-                                    v-html="link.label"
-                                ></div>
+                                >
+                                    <span v-html="link.label"></span>
+                                </div>
                                 <Link
                                     v-else
                                     :href="link.url"
@@ -229,8 +230,9 @@ watch([search, status], ([newSearch, newStatus]) => {
                                             : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
                                     "
                                     preserve-scroll
-                                    ><span v-html="link.label"></span
-                                ></Link>
+                                >
+                                    <span v-html="link.label"></span>
+                                </Link>
                             </template>
                         </div>
                     </div>

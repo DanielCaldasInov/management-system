@@ -77,7 +77,10 @@ const mainNavItems: NavItem[] = [
                 title: 'Supplier Orders',
                 href: '/supplier-orders',
             },
-            // Em breve colocaremos aqui as "Supplier Invoices"
+            {
+                title: 'Supplier Invoices',
+                href: '/supplier-invoices',
+            },
         ],
     },
     {
@@ -92,21 +95,6 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Articles',
                 href: '/articles',
-            },
-        ],
-    },
-    {
-        title: 'Purchases',
-        href: '#',
-        icon: PackageOpen,
-        items: [
-            {
-                title: 'Supplier Orders',
-                href: '/supplier-orders',
-            },
-            {
-                title: 'Supplier Invoices',
-                href: '/supplier-invoices',
             },
         ],
     },

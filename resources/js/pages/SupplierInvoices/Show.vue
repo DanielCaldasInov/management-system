@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import {
     Table,
@@ -38,7 +38,6 @@ const getStatusColor = (status: string) => {
     }
 };
 
-// Formulário para o Upload
 const form = useForm({
     attachment: null as File | null,
 });
@@ -50,7 +49,6 @@ const handleFileUpload = (event: Event) => {
     if (target.files && target.files[0]) {
         form.attachment = target.files[0];
 
-        // Fazer o submit automaticamente após escolher o ficheiro
         form.post(`/supplier-invoices/${props.invoice.id}/attachment`, {
             preserveScroll: true,
             onSuccess: () => {
@@ -63,6 +61,27 @@ const handleFileUpload = (event: Event) => {
 
 const triggerFileInput = () => {
     fileInput.value?.click();
+};
+
+const sendingEmail = ref(false);
+
+const sendEmail = () => {
+    if (!props.invoice.entity.email) {
+        alert('Este fornecedor não tem email configurado!');
+        return;
+    }
+
+    if (confirm(`Deseja enviar a fatura para ${props.invoice.entity.email}?`)) {
+        sendingEmail.value = true;
+        router.post(
+            `/supplier-invoices/${props.invoice.id}/send-email`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => (sendingEmail.value = false),
+            },
+        );
+    }
 };
 </script>
 
@@ -91,12 +110,45 @@ const triggerFileInput = () => {
                             Supplier:
                             <span
                                 class="font-medium text-gray-900 dark:text-gray-300"
-                                >{{ invoice.entity.name }}</span
                             >
+                                {{ invoice.entity.name }}
+                            </span>
                         </p>
                     </div>
-                </div>
 
+                    <div class="flex items-center gap-3">
+                        <button
+                            @click="sendEmail"
+                            :disabled="sendingEmail || !invoice.entity.email"
+                            class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                        >
+                            <svg
+                                v-if="!sendingEmail"
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                />
+                            </svg>
+                            <span
+                                v-else
+                                class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                            ></span>
+                            {{
+                                sendingEmail
+                                    ? 'Sending...'
+                                    : 'Notify Supplier'
+                            }}
+                        </button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <div class="space-y-6 lg:col-span-2">
                         <div
@@ -140,31 +192,33 @@ const triggerFileInput = () => {
                                                     : line.description
                                             }}
                                         </TableCell>
-                                        <TableCell class="text-right">{{
-                                            Number(line.quantity).toFixed(2)
-                                        }}</TableCell>
-                                        <TableCell class="text-right"
-                                            >€
+                                        <TableCell class="text-right">
+                                            {{
+                                                Number(line.quantity).toFixed(2)
+                                            }}
+                                        </TableCell>
+                                        <TableCell class="text-right">
+                                            €
                                             {{
                                                 Number(line.unit_price).toFixed(
                                                     2,
                                                 )
-                                            }}</TableCell
-                                        >
+                                            }}
+                                        </TableCell>
                                         <TableCell
                                             class="text-right font-medium"
-                                            >€
-                                            {{
-                                                Number(line.total).toFixed(2)
-                                            }}</TableCell
                                         >
+                                            €
+                                            {{ Number(line.total).toFixed(2) }}
+                                        </TableCell>
                                     </TableRow>
                                     <TableRow v-if="!invoice.lines.length">
                                         <TableCell
                                             colspan="4"
                                             class="py-4 text-center text-gray-500"
-                                            >No lines found.</TableCell
                                         >
+                                            No lines found.
+                                        </TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
@@ -187,12 +241,13 @@ const triggerFileInput = () => {
                                     <span>Issue Date</span>
                                     <span
                                         class="font-medium text-gray-900 dark:text-gray-200"
-                                        >{{
+                                    >
+                                        {{
                                             new Date(
                                                 invoice.issue_date,
                                             ).toLocaleDateString()
-                                        }}</span
-                                    >
+                                        }}
+                                    </span>
                                 </div>
                                 <div
                                     class="flex justify-between text-gray-600 dark:text-gray-400"
@@ -200,12 +255,13 @@ const triggerFileInput = () => {
                                     <span>Due Date</span>
                                     <span
                                         class="font-medium text-gray-900 dark:text-gray-200"
-                                        >{{
+                                    >
+                                        {{
                                             new Date(
                                                 invoice.due_date,
                                             ).toLocaleDateString()
-                                        }}</span
-                                    >
+                                        }}
+                                    </span>
                                 </div>
                                 <div
                                     class="my-3 border-t border-gray-200 dark:border-gray-800"

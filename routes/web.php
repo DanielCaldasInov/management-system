@@ -58,6 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Vies API
     Route::post('/api/vies/check', [ViesController::class, 'check'])->name('api.vies.check');
+
+    // Supplier Invoices
+    Route::post('/supplier-invoices/{supplierInvoice}/send-email', [SupplierInvoiceController::class, 'sendEmail'])->name('supplier-invoices.send-email');
 });
 
 require __DIR__.'/settings.php';

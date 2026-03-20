@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SupplierInvoiceMail;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -69,5 +71,25 @@ class SupplierInvoiceController extends Controller
         ]);
 
         return back()->with('success', 'Attachment uploaded successfully.');
+    }
+
+    public function sendEmail(Invoice $supplierInvoice)
+    {
+        if ($supplierInvoice->type !== 'supplier') {
+            abort(404);
+        }
+
+        if (! $supplierInvoice->entity->email) {
+            return back()->with('error', 'This supplier does not have an email.');
+        }
+
+        Mail::to($supplierInvoice->entity->email)
+            ->send(new SupplierInvoiceMail($supplierInvoice));
+
+        if ($supplierInvoice->status === 'draft') {
+            $supplierInvoice->update(['status' => 'pending']);
+        }
+
+        return back()->with('success', 'Email succesfully sent to '.$supplierInvoice->entity->email);
     }
 }
